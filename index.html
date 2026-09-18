@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APIWatch — Know When Your Third-Party APIs Go Down Before Your Users Do</title>
+  <meta name="description" content="APIWatch monitors the third-party APIs your product depends on — Stripe, Twilio, SendGrid, OpenAI — and alerts you the moment one degrades. Stop finding out from support tickets." />
+  <link rel="canonical" href="https://lior-seats.github.io/apiwatch-waitlist/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://lior-seats.github.io/apiwatch-waitlist/" />
+  <meta property="og:title" content="APIWatch — Know When Your Third-Party APIs Go Down Before Your Users Do" />
+  <meta property="og:description" content="Monitor the APIs your product depends on. Get alerted the moment Stripe, OpenAI, Twilio, or any API degrades — before your users do." />
+  <meta property="og:image" content="https://lior-seats.github.io/apiwatch-waitlist/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="APIWatch — Know When Third-Party APIs Fail Before Your Users Do" />
+  <meta name="twitter:description" content="Monitor Stripe, OpenAI, Twilio, and every API your product depends on. Real-time alerts, response time tracking, incident history." />
+  <meta name="twitter:image" content="https://lior-seats.github.io/apiwatch-waitlist/og-image.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:      #09080e;
+      --surface: #100f1a;
+      --surface2:#161424;
+      --border:  #1f1d30;
+      --accent:  #f59e0b;
+      --accent-h:#fbbf24;
+      --success: #22c55e;
+      --danger:  #ef4444;
+      --text:    #ede8f5;
+      --muted:   #8a86a0;
+      --radius:  10px;
+    }
+    html { scroll-behavior: smooth; }
+    body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; font-size:16px; line-height:1.6; }
+
+    nav { display:flex; align-items:center; justify-content:space-between; padding:18px 40px; border-bottom:1px solid var(--border); position:sticky; top:0; background:rgba(9,8,14,0.93); backdrop-filter:blur(12px); z-index:100; }
+    .logo { display:flex; align-items:center; gap:10px; font-size:1.1rem; font-weight:700; color:var(--text); text-decoration:none; }
+    .logo-icon { width:30px; height:30px; background:linear-gradient(135deg,var(--accent),var(--accent-h)); border-radius:8px; display:flex; align-items:center; justify-content:center; }
+    .nav-cta { background:var(--accent); color:#000; border:none; border-radius:7px; padding:8px 18px; font-size:0.9rem; font-weight:700; cursor:pointer; text-decoration:none; transition:background 0.15s; }
+    .nav-cta:hover { background:var(--accent-h); }
+
+    .hero { max-width:780px; margin:0 auto; padding:90px 24px 60px; text-align:center; }
+    .hero-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.3); color:var(--accent-h); border-radius:20px; padding:5px 14px; font-size:0.8rem; font-weight:600; letter-spacing:0.03em; text-transform:uppercase; margin-bottom:28px; }
+    h1 { font-size:clamp(2rem,5vw,3.1rem); font-weight:800; line-height:1.15; letter-spacing:-0.02em; margin-bottom:20px; }
+    .accent-text { color:var(--accent-h); }
+    .hero-sub { font-size:1.1rem; color:var(--muted); max-width:560px; margin:0 auto 36px; line-height:1.7; }
+
+    .hero-form, .waitlist-form { display:flex; gap:10px; max-width:460px; margin:0 auto 12px; flex-wrap:wrap; justify-content:center; }
+    .hero-form input[type="email"], .waitlist-form input[type="email"] { flex:1; min-width:220px; padding:13px 16px; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); color:var(--text); font-size:0.95rem; outline:none; transition:border-color 0.15s; }
+    .hero-form input:focus, .waitlist-form input:focus { border-color:var(--accent); }
+    .hero-form input::placeholder, .waitlist-form input::placeholder { color:var(--muted); }
+    .hero-form button, .waitlist-form button { padding:13px 24px; background:var(--accent); color:#000; border:none; border-radius:var(--radius); font-size:0.95rem; font-weight:700; cursor:pointer; transition:background 0.15s; white-space:nowrap; }
+    .hero-form button:hover, .waitlist-form button:hover { background:var(--accent-h); }
+    .hero-form button:disabled, .waitlist-form button:disabled { opacity:0.6; cursor:not-allowed; }
+    .form-note { font-size:0.78rem; color:var(--muted); }
+    .thank-you { display:none; align-items:center; gap:8px; justify-content:center; color:var(--success); font-weight:600; font-size:1rem; margin-top:12px; }
+
+    /* API status dashboard mockup */
+    .status-demo { max-width:500px; margin:56px auto 0; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px 24px; text-align:left; }
+    .status-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+    .status-title { font-size:0.8rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; }
+    .status-live { display:flex; align-items:center; gap:5px; font-size:0.75rem; color:var(--success); font-weight:600; }
+    .dot-live { width:6px; height:6px; border-radius:50%; background:var(--success); animation:pulse 1.6s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+    .api-row { display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid var(--border); }
+    .api-row:last-child { border-bottom:none; }
+    .api-status-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+    .dot-ok    { background:var(--success); }
+    .dot-slow  { background:var(--accent); }
+    .dot-down  { background:var(--danger); }
+    .api-name  { flex:1; font-size:0.88rem; font-weight:600; }
+    .api-latency { font-size:0.78rem; color:var(--muted); white-space:nowrap; }
+    .api-tag { font-size:0.7rem; font-weight:700; padding:2px 7px; border-radius:4px; white-space:nowrap; }
+    .tag-ok   { background:rgba(34,197,94,0.15); color:var(--success); }
+    .tag-slow { background:rgba(245,158,11,0.15); color:var(--accent-h); }
+    .tag-down { background:rgba(239,68,68,0.15); color:var(--danger); }
+
+    .providers-strip { text-align:center; padding:40px 24px 0; }
+    .providers-strip p { font-size:0.8rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:14px; }
+    .provider-pills { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; }
+    .pill { display:inline-flex; align-items:center; gap:6px; background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:5px 14px; font-size:0.8rem; font-weight:500; color:var(--muted); }
+    .pill-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); opacity:0.7; }
+
+    section { max-width:900px; margin:0 auto; padding:80px 24px; }
+    .section-label { font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--accent-h); margin-bottom:12px; }
+    .section-heading { font-size:clamp(1.6rem,3.5vw,2.3rem); font-weight:800; line-height:1.2; letter-spacing:-0.02em; margin-bottom:14px; }
+    .section-sub { color:var(--muted); font-size:1.05rem; max-width:540px; line-height:1.7; }
+
+    .pain-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:20px; margin-top:48px; }
+    .pain-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:22px; }
+    .pain-icon { width:36px; height:36px; border-radius:9px; background:rgba(239,68,68,0.1); display:flex; align-items:center; justify-content:center; margin-bottom:14px; }
+    .pain-card h3 { font-size:0.92rem; font-weight:700; margin-bottom:7px; }
+    .pain-card p { font-size:0.83rem; color:var(--muted); line-height:1.6; }
+
+    .features-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; margin-top:48px; }
+    .feature-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:22px; }
+    .feature-icon { width:38px; height:38px; border-radius:9px; background:rgba(245,158,11,0.1); display:flex; align-items:center; justify-content:center; margin-bottom:14px; }
+    .feature-card h3 { font-size:0.92rem; font-weight:700; margin-bottom:7px; }
+    .feature-card p { font-size:0.83rem; color:var(--muted); line-height:1.6; }
+
+    .pricing-box { background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:40px 36px; max-width:420px; margin:48px auto 0; text-align:center; }
+    .pricing-badge { display:inline-block; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); color:var(--accent-h); border-radius:20px; padding:4px 14px; font-size:0.78rem; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:20px; }
+    .pricing-amount { font-size:3rem; font-weight:900; letter-spacing:-0.03em; line-height:1; margin-bottom:6px; }
+    .pricing-amount span { font-size:1.1rem; font-weight:500; color:var(--muted); vertical-align:super; }
+    .pricing-period { font-size:0.85rem; color:var(--muted); margin-bottom:28px; }
+    .pricing-features { list-style:none; text-align:left; margin-bottom:30px; }
+    .pricing-features li { display:flex; align-items:center; gap:10px; padding:8px 0; font-size:0.88rem; border-bottom:1px solid var(--border); }
+    .pricing-features li:last-child { border-bottom:none; }
+    .check { color:var(--success); font-size:1rem; flex-shrink:0; }
+
+    .bottom-cta { background:var(--surface); border-top:1px solid var(--border); padding:80px 24px; text-align:center; }
+    .bottom-cta h2 { font-size:clamp(1.5rem,3.5vw,2.2rem); font-weight:800; line-height:1.2; letter-spacing:-0.02em; margin-bottom:14px; }
+    .bottom-cta p { color:var(--muted); margin-bottom:36px; }
+
+    footer { text-align:center; padding:28px 24px; font-size:0.8rem; color:var(--muted); border-top:1px solid var(--border); }
+    @media (max-width:600px) { nav{padding:14px 20px;} .hero{padding:60px 20px 50px;} section{padding:60px 20px;} .pricing-box{padding:28px 20px;} }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="logo">
+    <div class="logo-icon">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="5" stroke="black" stroke-width="1.6"/>
+        <path d="M8 5v3l2 2" stroke="black" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+    </div>
+    APIWatch
+  </a>
+  <a href="#waitlist" class="nav-cta">Get early access</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-badge">👁 Early Access · $19/month</div>
+  <h1>Your app is only as healthy<br/>as the <span class="accent-text">APIs it depends on.</span></h1>
+  <p class="hero-sub">When Stripe slows down or OpenAI times out, your users see broken features and silent errors. APIWatch tells you in seconds — before your support queue fills up.</p>
+
+  <form class="hero-form" action="https://agent-control-plane-w3m9.onrender.com/api/waitlist" method="POST">
+    <input type="email" name="email" placeholder="your@email.com" required />
+    <input type="hidden" name="source" value="apiwatch" />
+    <button type="submit">Join the waitlist</button>
+  </form>
+  <p class="form-note">No spam. No credit card. Unsubscribe anytime.</p>
+  <div class="thank-you" id="thank-you">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="#22c55e" stroke-width="1.6"/><path d="M5.5 9l2.5 2.5 4.5-5" stroke="#22c55e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    You're on the list! We'll be in touch soon.
+  </div>
+
+  <div class="status-demo">
+    <div class="status-header">
+      <span class="status-title">API Health · your-app.com</span>
+      <span class="status-live"><span class="dot-live"></span>Live</span>
+    </div>
+    <div class="api-row"><span class="api-status-dot dot-down"></span><span class="api-name">OpenAI API</span><span class="api-latency">—</span><span class="api-tag tag-down">DOWN 3m</span></div>
+    <div class="api-row"><span class="api-status-dot dot-slow"></span><span class="api-name">Stripe</span><span class="api-latency">1,240ms</span><span class="api-tag tag-slow">SLOW</span></div>
+    <div class="api-row"><span class="api-status-dot dot-ok"></span><span class="api-name">SendGrid</span><span class="api-latency">84ms</span><span class="api-tag tag-ok">OK</span></div>
+    <div class="api-row"><span class="api-status-dot dot-ok"></span><span class="api-name">GitHub API</span><span class="api-latency">210ms</span><span class="api-tag tag-ok">OK</span></div>
+    <div class="api-row"><span class="api-status-dot dot-ok"></span><span class="api-name">Twilio</span><span class="api-latency">145ms</span><span class="api-tag tag-ok">OK</span></div>
+  </div>
+</div>
+
+<div class="providers-strip">
+  <p>Monitor any API you depend on</p>
+  <div class="provider-pills">
+    <span class="pill"><span class="pill-dot"></span>Stripe</span>
+    <span class="pill"><span class="pill-dot"></span>OpenAI</span>
+    <span class="pill"><span class="pill-dot"></span>Twilio</span>
+    <span class="pill"><span class="pill-dot"></span>SendGrid</span>
+    <span class="pill"><span class="pill-dot"></span>GitHub</span>
+    <span class="pill"><span class="pill-dot"></span>AWS</span>
+    <span class="pill"><span class="pill-dot"></span>+ Any HTTP endpoint</span>
+  </div>
+</div>
+
+<section id="problem">
+  <div class="section-label">The Problem</div>
+  <h2 class="section-heading">Third-party outages look like<br/>your bugs until they don't.</h2>
+  <p class="section-sub">When OpenAI is down, your AI features silently fail. When Stripe is slow, checkout abandonment spikes. You don't know which until users complain.</p>
+  <div class="pain-grid">
+    <div class="pain-card">
+      <div class="pain-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#ef4444" stroke-width="1.6"/><path d="M10 6v4l3 3" stroke="#ef4444" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+      <h3>You debug your own code for hours — it's Stripe's problem</h3>
+      <p>Payment failures start spiking. You spend 90 minutes checking your integration before you think to check Stripe's status page. They had an incident.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3a7 7 0 100 14A7 7 0 0010 3z" stroke="#ef4444" stroke-width="1.6"/><path d="M7 10l2 2 4-4" stroke="#ef4444" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h3>Status pages don't tell you when it affects you</h3>
+      <p>Official status pages report from the provider's perspective. A partial outage that takes down your region might not even show as "degraded" on their dashboard.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 6h14M3 10h10M3 14h7" stroke="#ef4444" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+      <h3>Slowdowns are invisible until they're outages</h3>
+      <p>OpenAI response times creeping from 200ms to 2s degrade your UX for hours before you notice. By then you've lost users to timeout errors.</p>
+    </div>
+  </div>
+</section>
+
+<section id="features" style="background:var(--surface); border-top:1px solid var(--border); border-bottom:1px solid var(--border); max-width:100%; padding:80px 24px;">
+  <div style="max-width:900px; margin:0 auto;">
+    <div class="section-label">Features</div>
+    <h2 class="section-heading">Know first. Fix faster.</h2>
+    <p class="section-sub">APIWatch probes the specific endpoints your app calls — not generic status pages — and alerts you the moment something degrades.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10a7 7 0 1014 0A7 7 0 003 10z" stroke="#fbbf24" stroke-width="1.6"/><path d="M10 7v3l2 2" stroke="#fbbf24" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+        <h3>30-second polling</h3>
+        <p>APIWatch pings your critical API endpoints every 30 seconds and tracks latency, error rate, and response codes.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 4l12 12M16 4L4 16" stroke="#fbbf24" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+        <h3>Instant alerts</h3>
+        <p>Slack, email, or PagerDuty notification the moment an API goes down or crosses your latency threshold.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="5" width="14" height="10" rx="2" stroke="#fbbf24" stroke-width="1.6"/><path d="M6 9l3 3 5-5" stroke="#fbbf24" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3>Incident history</h3>
+        <p>Full timeline of every outage and slowdown — duration, affected endpoints, correlation with your own error spikes.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 17l4-4 4 2 6-10" stroke="#fbbf24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3>SLA reporting</h3>
+        <p>See which vendor is actually meeting their stated uptime SLA. Use it in contract renewals and vendor conversations.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="section-label">Pricing</div>
+  <h2 class="section-heading">Know everything. Pay almost nothing.</h2>
+  <p class="section-sub">One incident caught early pays for years of subscription. The math is trivial.</p>
+  <div class="pricing-box">
+    <div class="pricing-badge">Early Access</div>
+    <div class="pricing-amount"><span>$</span>19</div>
+    <div class="pricing-period">per month · all APIs included</div>
+    <ul class="pricing-features">
+      <li><span class="check">✓</span>Unlimited API endpoints monitored</li>
+      <li><span class="check">✓</span>30-second polling interval</li>
+      <li><span class="check">✓</span>Slack + email + PagerDuty alerts</li>
+      <li><span class="check">✓</span>Latency threshold alerts</li>
+      <li><span class="check">✓</span>90-day incident history</li>
+      <li><span class="check">✓</span>SLA tracking dashboard</li>
+    </ul>
+    <a href="#waitlist" class="nav-cta" style="display:block;text-align:center;padding:13px 24px;font-size:0.95rem;color:#000;">Join waitlist — get 3 months free</a>
+  </div>
+</section>
+
+<div class="bottom-cta" id="waitlist">
+  <h2>Stop debugging your code<br/>for someone else's outage.</h2>
+  <p>Join the waitlist. Early access members get 3 months free.</p>
+  <form class="waitlist-form" id="waitlist-form" action="https://agent-control-plane-w3m9.onrender.com/api/waitlist" method="POST">
+    <input type="email" name="email" placeholder="your@email.com" required />
+    <input type="hidden" name="source" value="apiwatch" />
+    <button type="submit">Join the waitlist</button>
+  </form>
+  <p class="form-note">No spam. No credit card. Unsubscribe anytime.</p>
+  <div class="thank-you" id="thank-you-bottom">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="#22c55e" stroke-width="1.6"/><path d="M5.5 9l2.5 2.5 4.5-5" stroke="#22c55e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    You're on the list! We'll be in touch soon.
+  </div>
+</div>
+
+<footer><p>© 2026 APIWatch · Early Access</p></footer>
+
+<script>
+  document.querySelectorAll('form').forEach(function(form) {
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var btn = form.querySelector('button[type="submit"]');
+      btn.textContent = 'Joining…'; btn.disabled = true;
+      var email = (form.querySelector('input[type="email"]') || {}).value || '';
+      var source = (form.querySelector('input[name="source"]') || {}).value || 'apiwatch';
+      try {
+        var res = await fetch(form.action, { method:'POST', body:JSON.stringify({email:email.trim(),source:source}), headers:{'Content-Type':'application/json','Accept':'application/json'} });
+        if (res.ok) {
+          form.style.display = 'none';
+          var ty = form.nextElementSibling;
+          while (ty && !ty.classList.contains('thank-you')) ty = ty.nextElementSibling;
+          if (!ty) ty = document.getElementById('thank-you');
+          if (ty) ty.style.display = 'flex';
+        } else { btn.textContent = 'Try again'; btn.disabled = false; }
+      } catch(e) { btn.textContent = 'Try again'; btn.disabled = false; }
+    });
+  });
+</script>
+</body>
+</html>
